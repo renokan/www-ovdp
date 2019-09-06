@@ -1,22 +1,23 @@
-import pygal
-import os
+from os import path
 from utils_load import log_activate
 from utils_load import db_init, db_connect
 from utils_load import data_load, data_convert, data_insert, report_create
 
 MODE_DEBUG = True  # True or False
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-APP_DIR = os.path.join(BASE_DIR, "ovdp")
-INST_DIR = os.path.join(BASE_DIR, "instance")
+BASE_DIR = path.abspath(path.dirname(__file__))
 
-LOGS_DIR = os.path.join(INST_DIR, "logs")
-if not os.path.isdir(LOGS_DIR):
+APP_DIR = path.join(BASE_DIR, "ovdp")
+INST_DIR = path.join(BASE_DIR, "instance")
+
+LOGS_DIR = path.join(INST_DIR, "logs")
+if not path.isdir(LOGS_DIR):
     LOGS_DIR = BASE_DIR
-DATABASE = os.path.join(APP_DIR, "auctions.db")
+DATABASE = path.join(APP_DIR, "auctions.db")
 if MODE_DEBUG is True:
-    DATABASE = os.path.join(INST_DIR, "auctions.db")
+    DATABASE = path.join(INST_DIR, "auctions.db")
+
 SOURCE_DATA = "https://bank.gov.ua/NBUStatService/v1/statdirectory/ovdp?json"
-REPORTS_DIR = os.path.join(APP_DIR, "static", "reports")
+REPORTS_DIR = path.join(APP_DIR, "static", "reports")
 
 
 def get_connect(db_file):
@@ -33,7 +34,7 @@ def get_connect(db_file):
             PRIMARY KEY (auct_num, date_in)
         );
     """
-    if not os.path.exists(db_file):
+    if not path.exists(db_file):
         result = db_init(db_file, db_schema)
         if result is True:
             logger.info("The database is initialized.")
@@ -64,7 +65,8 @@ if __name__ == '__main__':
         if total_changes:
             logger.info("Database updated, new data: {}".format(total_changes))
 
-            report_create()
+            val_codes = ['UAH', 'USD', 'EUR']
+            report_create(conn, val_codes, val_codes)
 
         conn.close()
 

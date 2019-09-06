@@ -4,6 +4,8 @@ import logging.config
 import sqlite3
 import requests
 import re
+import pygal
+from pygal.style import Style
 
 
 def log_activate(path_to_logs, mode_debug=False):
@@ -189,5 +191,26 @@ def data_insert(conn, data):
     return total_changes
 
 
-def report_create():
+def create_svg(val_code, period, data_in, data_out, path_to, year=None):
+    custom_style = Style(colors=("#0d00d6", "#ff0000"), background="#ffffff")
+
+    scale = ("million", 1000000)
+    if val_code == "UAH":
+        scale = ("billion", 1000000000)
+
+    title_report = "Currency {}, {}".format(val_code.upper(), scale[0])
+    file_svg = path_to + "report_stat_{}.svg".format(val_code.lower())
+    if year:
+        title_report = "Year: {} - Currency {}, {}".format(year, val_code.upper(), scale[0])
+        file_svg = path_to + "report_{}_{}.svg".format(year, val_code.lower())
+
+    val_chart = pygal.Bar(style=custom_style)
+    val_chart.title = title_report
+    val_chart.x_labels = map(str, period)
+    val_chart.add('In', [x / scale[1] for x in data_in])
+    val_chart.add('Out', [x / scale[1] for x in data_out])
+    val_chart.render_to_file(file_svg)
+
+
+def report_create(conn, val_codes):
     return "report_create() start..."
