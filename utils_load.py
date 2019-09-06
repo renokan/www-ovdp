@@ -1,11 +1,12 @@
 import os
+import logging
+import logging.config
 import sqlite3
+import requests
+import re
 
 
 def log_activate(path_to_logs, mode_debug=False):
-    import logging
-    import logging.config
-
     logger_on = "application"
     if mode_debug is True:
         logger_on = "debugging"
@@ -114,3 +115,79 @@ def db_select(connection, query, data=None):
         return [row for row in connection.execute(query, data)]
     else:
         return [row for row in connection.execute(query)]
+
+
+def data_load(source_data):
+    try:
+        request = requests.get(source_data, timeout=5)
+    except requests.exceptions.RequestException as err:
+        raise ConnectionError(str(err))
+    else:
+        if request.status_code != 200:
+            raise ConnectionError("Connection error. Status code: {}".format(request.status_code))
+
+        try:
+            data = request.json()
+        except Exception:
+            raise ValueError("Error converting data to JSON format.")
+        else:
+            return data
+
+
+def check_date(date_string):
+    """We check the date and change the format (for strftime) if necessary."""
+    if re.search(r'\d\d\d\d-\d\d-\d\d', date_string):
+        # 2021-03-24 -> Ok
+        return date_string
+    if re.search(r'\d\d\d\d\.\d\d\.\d\d', date_string):
+        # 2021.03.24 -> 2021-03-24 -> Ok
+        temp = date_string.split(".")
+        return "-".join(temp)
+    if re.search(r'\d\d\.\d\d\.\d\d\d\d', date_string):
+        # 24.03.2021 -> 2021-03-24 -> Ok
+        temp = date_string.split(".")
+        return "-".join(temp[::-1])
+
+
+def data_convert(data):
+    if data[0].get('auctiondate'):
+        result = []
+        for i in range(len(data)):
+            if data[i]['attraction'] > 0:
+                auct_num = data[i]['auctionnum']
+                date_in = check_date(data[i]['auctiondate'])
+                date_out = check_date(data[i]['repaydate'])
+                money = data[i]['attraction']
+                percent = data[i]['incomelevel']
+                val_code = data[i]['valcode'].strip()
+                stock_code = data[i]['stockcode'].strip()
+                # Collect data in a tuple.
+                row_data = (auct_num, date_in, date_out,
+                            money, percent, val_code, stock_code)
+                result.append(row_data)
+
+        return result
+
+
+def data_insert(conn, data):
+    check_data = "SELECT * FROM auctions WHERE auct_num = ? AND date_in = ?;"
+    insert_data = "INSERT INTO auctions (auct_num, date_in, date_out, money, \
+                                            percent, val_code, stock_code) \
+                                         VALUES (?, ?, ?, ?, ?, ?, ?);"
+    PRIMARY_KEY = slice(0, 2)
+    total_changes = 0
+
+    for row in data:
+        id_exists = db_select(conn, check_data, row[PRIMARY_KEY])
+        if not id_exists:
+            db_insert(conn, insert_data, row)
+
+    if conn.total_changes:
+        conn.commit()
+        total_changes = conn.total_changes
+
+    return total_changes
+
+
+def report_create():
+    return "report_create() start..."

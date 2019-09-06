@@ -1,8 +1,8 @@
-import requests
 import pygal
 import os
 from utils_load import log_activate
-from utils_load import db_init, db_connect, db_insert, db_select
+from utils_load import db_init, db_connect
+from utils_load import data_load, data_convert, data_insert, report_create
 
 MODE_DEBUG = True  # True or False
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -47,12 +47,29 @@ if __name__ == '__main__':
 
     conn = get_connect(DATABASE)
     if conn:
-        logger.info("Connect OK")
+        logger.debug("The connection is successful.")
+
+        total_changes = None
+        try:
+            data = data_load(SOURCE_DATA)
+        except ConnectionError as err_c:
+            logger.info("ConnectionError: {}".format(str(err_c)))
+        except ValueError as err_v:
+            logger.warning("ValueError: {}".format(str(err_v)))
+        else:
+            data = data_convert(data)
+            if data:
+                total_changes = data_insert(conn, data)
+
+        if total_changes:
+            logger.info("Database updated, new data: {}".format(total_changes))
+
+            report_create()
+
         conn.close()
 
-    # for x in range(50):
-    #     logger.debug('This is a debug message')
-    #     logger.info('This is an info message')
-    #     logger.warning('This is a warning message')
-    #     logger.error('This is an error message')
-    #     logger.critical('Тест This is a critical message')
+    # logger.debug('This is a debug message')
+    # logger.info('This is an info message')
+    # logger.warning('This is a warning message')
+    # logger.error('This is an error message')
+    # logger.critical('Тест This is a critical message')
