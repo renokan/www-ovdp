@@ -1,0 +1,56 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1 {
+    text-align: center;
+}
+
+#footer {
+    background-image: linear-gradient(white, yellow);
+    padding-bottom: 3rem;
+}
+
+#bootom-menu {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    padding: .5rem 1rem;
+    box-shadow: 0px 0px 15px 5px rgba(0,0,0,0.75);
+    opacity: .9;
+}
+
+#go-top:hover {
+	cursor: pointer;
+    color: #007bff;
+}
+
+ul#menu li:hover a {
+    color: #007bff;
+}
+
+
+@media all and (max-width: 960px) {
+  #select-year-right {
+    display: none;
+  }
+}
+
+@media all and (min-width: 960px) {
+  #select-year-bottom {
+    display: none;
+  }
+
+  ul#menu li {
+      border-bottom: 2px solid #f8f9fa;
+  }
+
+  ul#menu li.active {
+      border-bottom-color: #ffd885;
+  }
+
+  ul#menu li:hover {
+      border-bottom-color: #ffd885;
+  }
+
+}

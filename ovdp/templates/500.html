@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка 500 - Internal Server Error{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-3">Ошибка 500 - Internal Server Error</h1>
+        <div class="text-center mb-2">Internal Server Error – "внутренняя ошибка сервера".</div>
+        <div class="text-center mb-2">Не волнуйтесь, это что-то с нашей стороны - постараемся исправить проблему.</div>
+        <div class="text-center"><img src="../static/404.png"></div>
+        <div class="text-center">Или посмотрите другую информацию, для этого перейдите на <a href="{{ url_for('index') }}">главную</a>.</div>
+    </div>
+{% endblock %}

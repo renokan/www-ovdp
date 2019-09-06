@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Отчет по аукционам ОВГЗ{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-3">Отчет по аукционам ОВГЗ</h1>
+    <div class="mt-3">
+        <p><strong>Что анализируем</strong>: Результаты размещения облигаций внутренних государственных займов.</p>
+        <p><strong>Источник данных</strong>: API (в формате json) Национального банка Украины (НБУ).</p>
+    </div>
+
+    {% if auctions %}
+    <div class="row text-center">
+        <div class="col-12 col-lg-5 p-1">
+            <div class="card m-2 rounded-0 text-muted">
+                <div class="card-header"><small>Номер размещения облигаций</small></div>
+                <div class="card-body">
+                    <p class="card-text"><small>Дата размещения облигаций</small></p>
+                    <p class="card-text"><small>Предельный уровень доходности (%)</small></p>
+                    <p class="card-text"><small>Привлечено средств (UAH/USD/EUR)</small></p>
+                    <p class="card-text"><small>Срок погашения облигаций</small></p>
+                </div>
+                <div class="card-footer">
+                    <small>Код (ISIN) ценной бумаги</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-7 p-1">
+            <div class="row">
+            {% for x in auctions %}
+                <div class="col-12 col-md-6">
+                    <div class="card m-2 shadow rounded-0">
+                        <div class="card-header">{{ x[0] }}</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ x[1] }}</p>
+                            <p class="card-text">{{ x[4] | round(1) }}%</p>
+                            <p class="card-text">{{ x[3] | money_format }} <strong>{{ x[5] }}</strong></p>
+                            <p class="card-text">{{ x[2] }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <small>{{ x[6] }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-3">
+        <p><strong>Чего нет в цифрах</strong>: Не анализируются выплаченные проценты (от уровня доходности).</p>
+        <p><strong>Как считаем деньги</strong>: Суммируем все значения "Привлечено средств от размещения облигаций" для даты "размещения облигаций", и так же для даты "срок погашения облигаций".</p>
+        <p class="mb-0"><strong>Что хотим узнать</strong>: Сколько денег получено в рамках аукционов и сколько нужно вернуть.</p>
+    </div>
+
+    <div class="mt-3">
+        <div class="alert alert-info shadow rounded-0" role="alert">
+            <strong>Описание терминов</strong>: "In" - получено денег; "Out" - нужно вернуть; billion - млрд. грн; million - млн. USD/EUR.
+        </div>
+        <div class="report">
+            <object type="image/svg+xml" data="../static/reports/report_stat_uah.svg" width="100%" class="mb-3">
+                Your browser does not support SVG {{ static }}
+            </object>
+        </div>
+        <p class="mtb-2"><strong>Уточнение</strong>: Анализируем аукционы с 2012 года (см. выше), в базе есть данные с 2001 года (только в грн, см. ниже).</p>
+        <div class="report">
+             <object type="image/svg+xml" data="../static/reports/report_archive_uah.svg" width="100%" class="mb-3">
+              Your browser does not support SVG {{ static }}
+             </object>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
