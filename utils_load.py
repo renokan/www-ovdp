@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import logging
 import logging.config
 import sqlite3
@@ -154,6 +155,8 @@ def check_date(date_string):
 def data_convert(data):
     if data[0].get('auctiondate'):
         result = []
+        now = datetime.now()
+        now_year = now.year
         for i in range(len(data)):
             if data[i]['attraction'] > 0:
                 auct_num = data[i]['auctionnum']
@@ -163,7 +166,12 @@ def data_convert(data):
                 percent = data[i]['incomelevel']
                 val_code = data[i]['valcode'].strip()
                 stock_code = data[i]['stockcode'].strip()
-                # Collect data in a tuple.
+
+                if date_in:
+                    auction_year = int(date_in.split("-")[0])  # '2021-12-31'
+                    if auction_year > now_year:
+                        continue
+
                 row_data = (auct_num, date_in, date_out,
                             money, percent, val_code, stock_code)
                 result.append(row_data)

@@ -66,7 +66,7 @@ if __name__ == '__main__':
             logger.info("Database updated, new data: {}".format(total_changes))
 
             val_codes = ['UAH', 'USD', 'EUR']
-            report_create(conn, val_codes, val_codes)
+            report_create(conn, val_codes)
 
         conn.close()
 
