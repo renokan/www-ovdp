@@ -1,24 +1,8 @@
+from flask import render_template, request, abort, url_for, redirect, g
 from ovdp import app
-from flask import render_template, request, abort
-from flask import g
-import sqlite3
-from ovdp.utils_app import convert_to_int, paginate
+from ovdp.utils_app import get_years, get_db, convert_to_int, paginate
 
-
-current_year = 2019
-years = [x for x in range(2012, current_year)]
-
-
-def get_db():
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = sqlite3.connect(app.config['DATABASE'])
-    return g.sqlite_db
-
-
-@app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
+YEAR, YEARS = get_years(start_year=2012)
 
 
 @app.route('/')
@@ -29,25 +13,28 @@ def index():
     db = get_db()
     cursor = db.cursor()
     cursor.execute(query)
-    items = cursor.fetchmany(2)
-    return render_template("index.html", auctions=items)
+    data = cursor.fetchmany(2)
+
+    return render_template("index.html", auctions=data)
 
 
 @app.route('/stats')
 def stats():
-    return render_template("stats.html", show_year=current_year, list_year=years)
+    return render_template("stats.html", show_year=YEAR, list_year=YEARS)
 
 
 @app.route('/year')
-@app.route('/year/<int:num_year>')
-def show_year(num_year=None):
-    if num_year:
-        if num_year not in years:
-            abort(404)
+@app.route('/year/<int:year>')
+def show_year(year=None):
+    if not year:
+        year = YEAR
     else:
-        num_year = current_year
+        if year == YEAR:
+            return redirect(url_for('show_year'), code=307)
+        if year not in YEARS:
+            abort(404)
 
-    return render_template("year.html", show_year=num_year, list_year=years)
+    return render_template("year.html", show_year=year, list_year=YEARS)
 
 
 @app.route('/auctions')
@@ -63,7 +50,7 @@ def auctions():
         year = convert_to_int(get_year)
         if not year:
             abort(400)
-        if year not in years:
+        if year not in YEARS:
             abort(404)
 
         query = "SELECT * FROM auctions \
@@ -78,13 +65,13 @@ def auctions():
         if not page:
             abort(400)
 
-    item_qty = 16
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+    qty = 16
     try:
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute(query)
-        item_all = cursor.fetchall()
-        result = paginate(item_all, item_qty, page)
+        result = paginate(data, qty, page)
     except ConnectionError:
         abort(500)
     except ValueError:
@@ -92,7 +79,7 @@ def auctions():
     except Exception:
         abort(400)
     else:
-        return render_template("auctions.html", year=year, list_year=years, **result)
+        return render_template("auctions.html", year=year, list_year=YEARS, **result)
 
 
 @app.errorhandler(400)
@@ -112,9 +99,15 @@ def server_error(error):
 
 @app.context_processor
 def inject_year():
-    return dict(menu_year=current_year)
+    return dict(year_in_menu=YEAR)
 
 
 @app.template_filter()
 def money_format(value):
     return format(round(value), ',d')
+
+
+@app.teardown_appcontext
+def close_db(error):
+    if hasattr(g, 'sqlite_db'):
+        g.sqlite_db.close()
