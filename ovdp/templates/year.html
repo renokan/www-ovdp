@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Анализируем {{ show_year }} год (данные помесячно){% endblock %}
+{% block title %}Анализируем {{ year }} год (данные помесячно){% endblock %}
 
 {% block content %}
 
     <div class="container">
-        <h1 class="m-3">Анализируем <span class="badge badge-info">{{ show_year }}</span> год</h1>
+        <h1 class="m-3">Анализируем <span class="badge badge-info">{{ year }}</span> год</h1>
         <div class="alert alert-info shadow rounded-0" role="alert">
             <strong>Описание терминов</strong>: "In" - получено денег; "Out" - нужно вернуть; billion - млрд. грн; million - млн. USD/EUR.
         </div>
         <div class="row">
             <div id="select-year-right" class="col-lg-2 order-lg-2">
-                {% if list_year %}
+                {% if years %}
                 <div class="list-group mb-3 menu-year">
-                    {% for year in list_year|reverse() %}
+                    {% for year in years|reverse() %}
                     <a class="list-group-item list-group-item-action text-center p-2" href="{{ url_for('show_year') }}/{{ year }}">{{ year }}</a>
                     {% endfor %}
                 </div>
@@ -21,25 +21,25 @@
             </div>
             <div class="col-12 col-lg-10 order-lg-1">
                 <div class="report">
-                     <object type="image/svg+xml" data="../static/reports/report_{{ show_year }}_uah.svg" width="100%" class="shadow border border-info p-2 mb-3">
+                     <object type="image/svg+xml" data="../static/reports/report_{{ year }}_uah.svg" width="100%" class="shadow border border-info p-2 mb-3">
                       Your browser does not support SVG
                      </object>
                 </div>
                 <div class="report">
-                     <object type="image/svg+xml" data="../static/reports/report_{{ show_year }}_usd.svg" width="100%" class="shadow border border-info p-2 mb-3">
+                     <object type="image/svg+xml" data="../static/reports/report_{{ year }}_usd.svg" width="100%" class="shadow border border-info p-2 mb-3">
                       Your browser does not support SVG
                      </object>
                 </div>
                 <div class="report">
-                     <object type="image/svg+xml" data="../static/reports/report_{{ show_year }}_eur.svg" width="100%" class="shadow border border-info p-2 mb-3">
+                     <object type="image/svg+xml" data="../static/reports/report_{{ year }}_eur.svg" width="100%" class="shadow border border-info p-2 mb-3">
                       Your browser does not support SVG
                      </object>
                  </div>
             </div>
         </div>
-        {% if list_year %}
+        {% if years %}
         <div id="select-year-bottom" class="list-group list-group-horizontal mb-3">
-            {% for year in list_year %}
+            {% for year in years %}
             <a class="list-group-item list-group-item-action text-center p-1" href="{{ url_for('show_year') }}/{{ year }}"><small>{{ year }}</small></a>
             {% endfor %}
         </div>

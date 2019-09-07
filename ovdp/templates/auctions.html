@@ -24,9 +24,9 @@
                 {% endfor %}
             </div>
             <div class="text-center p-4">{% if previous %}<a href="?page={{ previous }}{% if year %}&year={{ year }}{% endif %}" title="Previous page">&laquo;</a>&nbsp; {% endif %}Текущая страница {{ page }} (из {{ pages }}){% if next %} &nbsp;<a href="?page={{ next }}{% if year %}&year={{ year }}{% endif %}" title="Next page">&raquo;</a>{% endif %}</div>
-            {% if list_year %}
+            {% if years %}
             <div class="list-group list-group-horizontal mb-3">
-                {% for year in list_year %}
+                {% for year in years %}
                 <a class="list-group-item list-group-item-action text-center p-1" href="{{ url_for('auctions') }}?page=1&year={{ year }}"><small>{{ year }}</small></a>
                 {% endfor %}
             </div>

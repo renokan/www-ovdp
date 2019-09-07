@@ -26,7 +26,7 @@ def index():
 
 @app.route('/stats')
 def stats():
-    return render_template("stats.html", show_year=YEAR, list_year=YEARS)
+    return render_template("stats.html")
 
 
 @app.route('/year')
@@ -40,7 +40,7 @@ def show_year(year=None):
         if year not in YEARS:
             abort(404)
 
-    return render_template("year.html", show_year=year, list_year=YEARS)
+    return render_template("year.html", year=year)
 
 
 @app.route('/auctions')
@@ -85,7 +85,7 @@ def auctions():
     except Exception:
         abort(400)
     else:
-        return render_template("auctions.html", year=year, list_year=YEARS, **result)
+        return render_template("auctions.html", year=year, **result)
 
 
 @app.errorhandler(400)
@@ -104,8 +104,8 @@ def server_error(error):
 
 
 @app.context_processor
-def inject_year():
-    return dict(year_in_menu=YEAR)
+def inject_years():
+    return dict(year_in_menu=YEAR, years=YEARS)
 
 
 @app.template_filter()
