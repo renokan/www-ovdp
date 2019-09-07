@@ -1,4 +1,9 @@
 
+def convert_to_int(string):
+    if string.isdigit():
+        return int(string)
+
+
 def paginate(item_all, item_qty, page=1):
     if not item_all:
         raise ConnectionError

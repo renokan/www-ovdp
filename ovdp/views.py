@@ -2,7 +2,7 @@ from ovdp import app
 from flask import render_template, request, abort
 from flask import g
 import sqlite3
-from ovdp.utils_app import paginate
+from ovdp.utils_app import convert_to_int, paginate
 
 
 current_year = 2019
@@ -56,28 +56,26 @@ def auctions():
                       WHERE CAST(strftime('%Y', date_in) as INTEGER) > 2011 \
                       ORDER BY date_in DESC, auct_num DESC;"
 
-    year = None
-    check_year = request.args.get('year')
-    if check_year:
-        if check_year.isdigit():
-            check_year = int(check_year)
-        else:
+    get_year = request.args.get('year')
+    if not get_year:
+        year = None
+    else:
+        year = convert_to_int(get_year)
+        if not year:
             abort(400)
-
-        if check_year not in years:
+        if year not in years:
             abort(404)
 
-        year = check_year
         query = "SELECT * FROM auctions \
                           WHERE CAST(strftime('%Y', date_in) as INTEGER) = {} \
                           ORDER BY date_in DESC, auct_num DESC;".format(year)
 
-    page = 1
-    check_page = request.args.get('page')
-    if check_page:
-        if check_page.isdigit():
-            page = int(check_page)
-        else:
+    get_page = request.args.get('page')
+    if not get_page:
+        page = 1
+    else:
+        page = convert_to_int(get_page)
+        if not page:
             abort(400)
 
     item_qty = 16
