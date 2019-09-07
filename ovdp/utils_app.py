@@ -3,10 +3,17 @@ from flask import g
 import sqlite3
 
 
-def get_years(start_year):
-    year = 2019
-    years = [x for x in range(start_year, year)]
-    return (year, years)
+def get_years(query):
+    conn = sqlite3.connect(app.config['DATABASE'])
+    years = [row[0] for row in conn.execute(query)]
+    conn.close()
+
+    if years:
+        year = years.pop()
+        return (year, years)
+
+    years = [x for x in range(2012, 2019)]
+    return (2019, years)
 
 
 def get_db():

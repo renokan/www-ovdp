@@ -1,15 +1,21 @@
-from flask import render_template, request, abort, url_for, redirect, g
 from ovdp import app
+from flask import request, url_for, g
+from flask import render_template, abort, redirect
 from ovdp.utils_app import get_years, get_db, convert_to_int, paginate
 
-YEAR, YEARS = get_years(start_year=2012)
+YEARS_AFTER = 2011
+query = "SELECT DISTINCT CAST(strftime('%Y', date_in) as INTEGER) as year \
+                                        FROM auctions \
+                                        WHERE year > {} \
+                                        ORDER BY year ASC;".format(YEARS_AFTER)
+YEAR, YEARS = get_years(query)
 
 
 @app.route('/')
 def index():
     query = "SELECT * FROM auctions \
-                      WHERE CAST(strftime('%Y', date_in) as INTEGER) > 2011 \
-                      ORDER BY date_in DESC, auct_num DESC;"
+                      WHERE CAST(strftime('%Y', date_in) as INTEGER) > {} \
+                      ORDER BY date_in DESC, auct_num DESC;".format(YEARS_AFTER)
     db = get_db()
     cursor = db.cursor()
     cursor.execute(query)
@@ -40,8 +46,8 @@ def show_year(year=None):
 @app.route('/auctions')
 def auctions():
     query = "SELECT * FROM auctions \
-                      WHERE CAST(strftime('%Y', date_in) as INTEGER) > 2011 \
-                      ORDER BY date_in DESC, auct_num DESC;"
+                      WHERE CAST(strftime('%Y', date_in) as INTEGER) > {} \
+                      ORDER BY date_in DESC, auct_num DESC;".format(YEARS_AFTER)
 
     get_year = request.args.get('year')
     if not get_year:
