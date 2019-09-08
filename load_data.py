@@ -13,14 +13,14 @@ LOGS_DIR = path.join(INST_DIR, "logs")
 if not path.isdir(LOGS_DIR):
     LOGS_DIR = BASE_DIR
 DATABASE = path.join(APP_DIR, "auctions.db")
-if MODE_DEBUG is True:
-    DATABASE = path.join(INST_DIR, "auctions.db")
 
 SOURCE_DATA = "https://bank.gov.ua/NBUStatService/v1/statdirectory/ovdp?json"
 REPORTS_DIR = path.join(APP_DIR, "static", "reports")
-if MODE_DEBUG is True:
-    REPORTS_DIR = INST_DIR
 YEARS_AFTER = 2011
+
+if MODE_DEBUG is True:
+    DATABASE = path.join(INST_DIR, "auctions.db")
+    REPORTS_DIR = INST_DIR
 
 
 def get_connect(db_file):
@@ -61,9 +61,3 @@ if __name__ == '__main__':
             logger.info(result)
 
         conn.close()
-
-    # logger.debug('This is a debug message')
-    # logger.info('This is an info message')
-    # logger.warning('This is a warning message')
-    # logger.error('This is an error message')
-    # logger.critical('This is a critical message')
