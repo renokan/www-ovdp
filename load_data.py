@@ -18,24 +18,15 @@ if MODE_DEBUG is True:
 
 SOURCE_DATA = "https://bank.gov.ua/NBUStatService/v1/statdirectory/ovdp?json"
 REPORTS_DIR = path.join(APP_DIR, "static", "reports")
+if MODE_DEBUG is True:
+    REPORTS_DIR = INST_DIR
+YEARS_AFTER = 2011
 
 
 def get_connect(db_file):
     """Get connect to the database."""
-    db_schema = """
-        CREATE TABLE IF NOT EXISTS auctions (
-            auct_num    integer not NULL,
-            date_in     text not NULL,
-            date_out    text not NULL,
-            money       real not NULL,
-            percent     real not NULL,
-            val_code    text not NULL,
-            stock_code  text not NULL,
-            PRIMARY KEY (auct_num, date_in)
-        );
-    """
     if not path.exists(db_file):
-        result = db_init(db_file, db_schema)
+        result = db_init(db_file)
         if result is True:
             logger.info("The database is initialized.")
         else:
@@ -66,7 +57,8 @@ if __name__ == '__main__':
             logger.info("Database updated, new data: {}".format(total_changes))
 
             val_codes = ['UAH', 'USD', 'EUR']
-            report_create(conn, val_codes)
+            result = report_create(conn, REPORTS_DIR, YEARS_AFTER, val_codes)
+            logger.info(result)
 
         conn.close()
 
@@ -74,4 +66,4 @@ if __name__ == '__main__':
     # logger.info('This is an info message')
     # logger.warning('This is a warning message')
     # logger.error('This is an error message')
-    # logger.critical('Тест This is a critical message')
+    # logger.critical('This is a critical message')

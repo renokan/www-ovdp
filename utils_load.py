@@ -85,23 +85,35 @@ def log_activate(path_to_logs, mode_debug=False):
 
     logging.config.dictConfig(dictLogConfig)
     logger = logging.getLogger(logger_on)
-    logger.info('*** The logger is activated. ***')
+    logger.debug('*** The logger is activated. ***')
 
     return logger
 
 
-def db_init(path_to_db, schema_db):
+def db_init(file_db):
+    schema = """
+        CREATE TABLE IF NOT EXISTS auctions (
+            auct_num    integer not NULL,
+            date_in     text not NULL,
+            date_out    text not NULL,
+            money       real not NULL,
+            percent     real not NULL,
+            val_code    text not NULL,
+            stock_code  text not NULL,
+            PRIMARY KEY (auct_num, date_in)
+        );
+    """
     try:
-        connection = sqlite3.connect(path_to_db)
-        connection.executescript(schema_db)
+        connection = sqlite3.connect(file_db)
+        connection.executescript(schema)
     except sqlite3.DatabaseError as err:
         return str(err)
     else:
         return True
 
 
-def db_connect(path_to_db):
-    return sqlite3.connect(path_to_db)
+def db_connect(file_db):
+    return sqlite3.connect(file_db)
 
 
 def db_insert(connection, query, data):
@@ -199,26 +211,87 @@ def data_insert(conn, data):
     return total_changes
 
 
-def create_svg(val_code, period, data_in, data_out, path_to, year=None):
+def inout_get_data(conn, val_code, column_inout, year=None):
+    query_y = "SELECT CAST(strftime('%m', {0}) as INTEGER) as month, SUM(money) \
+                            FROM auctions \
+                            WHERE val_code = ? AND  \
+                                  CAST(strftime('%Y', {0}) as INTEGER) = ? \
+                            GROUP BY month \
+                            ORDER BY month ASC;".format(column_inout)
+    query_s = "SELECT CAST(strftime('%Y', {}) as INTEGER) as year, SUM(money) \
+                                    FROM auctions \
+                                    WHERE val_code = ? \
+                                    GROUP BY year \
+                                    ORDER BY year ASC;".format(column_inout)
+
+    if year:
+        return db_select(conn, query_y, (val_code, year))
+    else:
+        return db_select(conn, query_s, (val_code, ))
+
+
+def inout_convert_data(data, period, scale_size):
+    result = []
+    for date_x in period:
+        money = 0
+        for row in data:
+            if row[0] == date_x:
+                money = round((row[1] / scale_size), 2)
+        result.append(money)
+
+    return result
+
+
+def inout_get_period(data_1, data_2, years_after):
+    years_1 = [x[0] for x in data_1 if x[0] > years_after]
+    years_2 = [x[0] for x in data_2 if x[0] > years_after]
+    years = list(set(years_1).union(set(years_2)))
+    years.sort()
+    return years
+
+
+def create_svg(title, period, data_in, data_out, file_svg):
     custom_style = Style(colors=("#0d00d6", "#ff0000"), background="#ffffff")
 
-    scale = ("million", 1000000)
-    if val_code == "UAH":
-        scale = ("billion", 1000000000)
-
-    title_report = "Currency {}, {}".format(val_code.upper(), scale[0])
-    file_svg = path_to + "report_stat_{}.svg".format(val_code.lower())
-    if year:
-        title_report = "Year: {} - Currency {}, {}".format(year, val_code.upper(), scale[0])
-        file_svg = path_to + "report_{}_{}.svg".format(year, val_code.lower())
-
-    val_chart = pygal.Bar(style=custom_style)
-    val_chart.title = title_report
-    val_chart.x_labels = map(str, period)
-    val_chart.add('In', [x / scale[1] for x in data_in])
-    val_chart.add('Out', [x / scale[1] for x in data_out])
-    val_chart.render_to_file(file_svg)
+    svg_chart = pygal.Bar(style=custom_style)
+    svg_chart.title = title
+    svg_chart.x_labels = map(str, period)
+    svg_chart.add('In', data_in)
+    svg_chart.add('Out', data_out)
+    svg_chart.render_to_file(file_svg)
 
 
-def report_create(conn, val_codes):
-    return "report_create() start..."
+def report_create(conn, path_to, years_after, val_codes):
+    years = "SELECT DISTINCT CAST(strftime('%Y', date_in) as INTEGER) as year \
+                                            FROM auctions \
+                                            ORDER BY year ASC;"
+    years = [row[0] for row in conn.execute(years)]
+    year = years.pop()
+
+    for val_code in val_codes:
+        if val_code == "UAH":
+            scale = {"title": "billion", "size": 1000000000}
+        else:
+            scale = {"title": "million", "size": 1000000}
+
+        # Create stat report
+        title = "Currency {}, {}".format(val_code.upper(), scale["title"])
+        file_svg = os.path.join(path_to, "report_stat_{}.svg".format(val_code.lower()))
+        data_in = inout_get_data(conn, val_code, 'date_in')
+        data_out = inout_get_data(conn, val_code, 'date_out')
+        years = inout_get_period(data_in, data_out, years_after)
+        data_in = inout_convert_data(data_in, years, scale["size"])
+        data_out = inout_convert_data(data_out, years, scale["size"])
+        create_svg(title, years, data_in, data_out, file_svg)
+
+        # Create year report
+        title = "Year: {} - Currency {}, {}".format(year, val_code.upper(), scale["title"])
+        file_svg = os.path.join(path_to, "report_{}_{}.svg".format(year, val_code.lower()))
+        data_in = inout_get_data(conn, val_code, 'date_in', year)
+        data_out = inout_get_data(conn, val_code, 'date_out', year)
+        months = [x for x in range(1, 13)]
+        data_in = inout_convert_data(data_in, months, scale["size"])
+        data_out = inout_convert_data(data_out, months, scale["size"])
+        create_svg(title, months, data_in, data_out, file_svg)
+
+    return "Reports are ready."
