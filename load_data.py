@@ -3,7 +3,7 @@ from utils_load import log_activate
 from utils_load import db_init, db_connect
 from utils_load import data_load, data_convert, data_insert, report_create
 
-MODE_DEBUG = True  # True or False
+MODE_DEBUG = False  # True or False
 BASE_DIR = path.abspath(path.dirname(__file__))
 
 APP_DIR = path.join(BASE_DIR, "ovdp")
