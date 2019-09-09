@@ -45,9 +45,9 @@ if __name__ == '__main__':
         try:
             data = data_load(SOURCE_DATA)
         except ConnectionError as err_c:
-            logger.info("ConnectionError: {}".format(str(err_c)))
+            logger.info("ConnectionError: {}".format(err_c))
         except ValueError as err_v:
-            logger.warning("ValueError: {}".format(str(err_v)))
+            logger.warning("ValueError: {}".format(err_v))
         else:
             data = data_convert(data)
             if data:

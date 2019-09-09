@@ -139,7 +139,7 @@ def data_load(source_data):
         raise ConnectionError(str(err))
     else:
         if request.status_code != 200:
-            raise ConnectionError("Connection error. Status code: {}".format(request.status_code))
+            raise ConnectionError("Request status_code {}".format(request.status_code))
 
         try:
             data = request.json()
