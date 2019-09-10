@@ -1,18 +1,18 @@
 from ovdp import app
 from flask import request, url_for, g
 from flask import render_template, abort, redirect
-from ovdp.utils_app import get_years, get_db, convert_to_int, paginate
-from ovdp.queries import queries
+from ovdp.utils_app import get_query, get_db, db_years
+from ovdp.utils_app import convert_to_int, paginate
 
 YEARS_AFTER = 2011
 
-query = queries['years'].format(YEARS_AFTER)
-YEAR, YEARS = get_years(query)
+query = get_query('years').format(YEARS_AFTER)
+YEAR, YEARS = db_years(query)
 
 
 @app.route('/')
 def index():
-    query = queries['auctions'].format(YEARS_AFTER)
+    query = get_query('auctions').format(YEARS_AFTER)
 
     db = get_db()
     cursor = db.cursor()
@@ -43,7 +43,7 @@ def show_year(year=None):
 
 @app.route('/auctions')
 def auctions():
-    query = queries['auctions'].format(YEARS_AFTER)
+    query = get_query('auctions').format(YEARS_AFTER)
 
     get_year = request.args.get('year')
     if not get_year:
@@ -55,7 +55,7 @@ def auctions():
         if year not in YEARS:
             abort(404)
 
-        query = queries['auct_year'].format(year)
+        query = get_query('auct_year').format(year)
 
     get_page = request.args.get('page')
     if not get_page:
