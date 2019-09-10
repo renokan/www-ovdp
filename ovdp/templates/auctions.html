@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <p class="card-text">{{ x[1] }}</p>
                     <p class="card-text">{{ x[4] | round(1) }}%</p>
-                    <p class="card-text">{{ x[3] | money_format }} <strong>{{ x[5] }}</strong></p>
+                    <p class="card-text" title="{{ x[3] }} {{ x[5] }}">{{ x[3] | money_format }} <strong>{{ x[5] }}</strong></p>
                     <p class="card-text">{{ x[2] }}</p>
                 </div>
                 <div class="card-footer">
