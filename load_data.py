@@ -25,7 +25,7 @@ if MODE_DEBUG is True:
 
 def get_connect(db_file):
     """Get connect to the database."""
-    if not path.exists(db_file):
+    if not path.isfile(db_file):
         result = db_init(db_file)
         if result is True:
             logger.info("The database is initialized.")
