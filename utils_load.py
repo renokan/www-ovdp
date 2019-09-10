@@ -90,6 +90,19 @@ def log_activate(path_to_logs, mode_debug=False):
     return logger
 
 
+def get_connect(db_file):
+    """Get connect to the database."""
+    if not os.path.isfile(db_file):
+        result = db_init(db_file)
+        if result is True:
+            pass
+            # logger.info("The database is initialized.")
+        else:
+            pass
+            # logger.warning("The database is not initialized. Error: '{}'".format(result))
+    return db_connect(db_file)
+
+
 def db_init(file_db):
     schema = """
         CREATE TABLE IF NOT EXISTS auctions (
