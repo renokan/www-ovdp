@@ -25,7 +25,7 @@ def loader(mode_debug=False):
 
     logger = log_activate(LOGS_DIR, mode_debug)
 
-    conn = get_connect(DATABASE)
+    conn = get_connect(logger, DATABASE)
     if conn:
         logger.debug("The connection is successful.")
 

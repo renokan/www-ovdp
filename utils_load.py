@@ -90,16 +90,15 @@ def log_activate(path_to_logs, mode_debug=False):
     return logger
 
 
-def get_connect(db_file):
+def get_connect(logger, db_file):
     """Get connect to the database."""
     if not os.path.isfile(db_file):
         result = db_init(db_file)
         if result is True:
-            pass
-            # logger.info("The database is initialized.")
+            logger.info("The database is initialized.")
         else:
-            pass
-            # logger.warning("The database is not initialized. Error: '{}'".format(result))
+            logger.warning("The database is not initialized. Error: '{}'".format(result))
+
     return db_connect(db_file)
 
 
@@ -243,13 +242,15 @@ def inout_get_data(conn, val_code, column_inout, year=None):
         return db_select(conn, query_s, (val_code, ))
 
 
-def inout_convert_data(data, period, scale_size):
+def inout_convert_data(period, data, scale_size, round_size=2):
+    """We fill in the missing data in the period with values ​​of 0."""
     result = []
     for date_x in period:
         money = 0
         for row in data:
-            if row[0] == date_x:
-                money = round((row[1] / scale_size), 2)
+            date_y, money_origin = row
+            if date_y == date_x:
+                money = round((money_origin / scale_size), round_size)
         result.append(money)
 
     return result
@@ -293,8 +294,8 @@ def report_create(conn, path_to, years_after, val_codes):
         data_in = inout_get_data(conn, val_code, 'date_in')
         data_out = inout_get_data(conn, val_code, 'date_out')
         years = inout_get_period(data_in, data_out, years_after)
-        data_in = inout_convert_data(data_in, years, scale["size"])
-        data_out = inout_convert_data(data_out, years, scale["size"])
+        data_in = inout_convert_data(years, data_in, scale["size"])
+        data_out = inout_convert_data(years, data_out, scale["size"])
         create_svg(title, years, data_in, data_out, file_svg)
 
         # Create year report
@@ -303,8 +304,8 @@ def report_create(conn, path_to, years_after, val_codes):
         data_in = inout_get_data(conn, val_code, 'date_in', year)
         data_out = inout_get_data(conn, val_code, 'date_out', year)
         months = [x for x in range(1, 13)]
-        data_in = inout_convert_data(data_in, months, scale["size"])
-        data_out = inout_convert_data(data_out, months, scale["size"])
+        data_in = inout_convert_data(months, data_in, scale["size"])
+        data_out = inout_convert_data(months, data_out, scale["size"])
         create_svg(title, months, data_in, data_out, file_svg)
 
     return "Reports are ready."
