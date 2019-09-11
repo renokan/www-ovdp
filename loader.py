@@ -33,12 +33,15 @@ def loader(mode_debug=False):
         try:
             data = data_load(SOURCE_DATA)
         except ConnectionError as err_c:
-            logger.info("ConnectionError: {}".format(err_c))
+            logger.info("Connection Error: {}".format(err_c))
         except ValueError as err_v:
-            logger.warning("ValueError: {}".format(err_v))
+            logger.warning("Error: {}".format(err_v))
         else:
-            data = data_convert(data)
-            if data:
+            try:
+                data = data_convert(data)
+            except ValueError as err_v:
+                logger.critical("Data conversion Error: {}".format(err_v))
+            else:
                 total_changes = data_insert(conn, data)
 
         if total_changes:

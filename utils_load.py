@@ -191,10 +191,12 @@ def data_convert(data):
                 val_code = data[i]['valcode'].strip()
                 stock_code = data[i]['stockcode'].strip()
 
-                if date_in:
-                    auction_year = int(date_in.split("-")[0])  # '2021-12-31'
-                    if auction_year > now_year:
-                        continue
+                if not date_in or not date_out:
+                    raise ValueError("Invalid date format.")
+
+                auction_year = int(date_in.split("-")[0])  # '2021-12-31'
+                if auction_year > now_year:
+                    continue
 
                 row_data = (auct_num, date_in, date_out,
                             money, percent, val_code, stock_code)
