@@ -48,7 +48,6 @@ def loader(mode_debug=False):
             logger.info("Database updated, new data: {}".format(total_changes))
 
             val_codes = ['UAH', 'USD', 'EUR']
-            result = report_create(conn, REPORTS_DIR, YEARS_AFTER, val_codes)
-            logger.info(result)
+            report_create(conn, REPORTS_DIR, YEARS_AFTER, val_codes)
 
         conn.close()

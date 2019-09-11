@@ -290,9 +290,10 @@ def report_create(conn, path_to, years_after, val_codes):
         else:
             scale = {"title": "million", "size": 1000000}
 
-        # Create stat report
+        # Stats: create report in SVG format.
         title = "Currency {}, {}".format(val_code.upper(), scale["title"])
-        file_svg = os.path.join(path_to, "report_stat_{}.svg".format(val_code.lower()))
+        file_svg = "report_stat_{}.svg"
+        file_svg = os.path.join(path_to, file_svg.format(val_code.lower()))
         data_in = inout_get_data(conn, val_code, 'date_in')
         data_out = inout_get_data(conn, val_code, 'date_out')
         years = inout_get_period(data_in, data_out, years_after)
@@ -300,14 +301,13 @@ def report_create(conn, path_to, years_after, val_codes):
         data_out = inout_convert_data(years, data_out, scale["size"])
         create_svg(title, years, data_in, data_out, file_svg)
 
-        # Create year report
+        # Year: create report in SVG format.
         title = "Year: {} - Currency {}, {}".format(year, val_code.upper(), scale["title"])
-        file_svg = os.path.join(path_to, "report_{}_{}.svg".format(year, val_code.lower()))
+        file_svg = "report_{}_{}.svg"
+        file_svg = os.path.join(path_to, file_svg.format(year, val_code.lower()))
         data_in = inout_get_data(conn, val_code, 'date_in', year)
         data_out = inout_get_data(conn, val_code, 'date_out', year)
         months = [x for x in range(1, 13)]
         data_in = inout_convert_data(months, data_in, scale["size"])
         data_out = inout_convert_data(months, data_out, scale["size"])
         create_svg(title, months, data_in, data_out, file_svg)
-
-    return "Reports are ready."
