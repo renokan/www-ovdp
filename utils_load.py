@@ -163,14 +163,14 @@ def data_load(source_data):
 
 def check_date(date_string):
     """We check the date and change the format (for strftime) if necessary."""
-    if re.search(r'\d\d\d\d-\d\d-\d\d', date_string):
+    if re.search(r'\d{4}-\d\d-\d\d', date_string):
         # 2021-03-24 -> Ok
         return date_string
-    if re.search(r'\d\d\d\d\.\d\d\.\d\d', date_string):
+    if re.search(r'\d{4}.\d\d.\d\d', date_string):
         # 2021.03.24 -> 2021-03-24 -> Ok
         temp = date_string.split(".")
         return "-".join(temp)
-    if re.search(r'\d\d\.\d\d\.\d\d\d\d', date_string):
+    if re.search(r'\d\d\.[0-1][0-9]\.\d{4}\b', date_string):
         # 24.03.2021 -> 2021-03-24 -> Ok
         temp = date_string.split(".")
         return "-".join(temp[::-1])
