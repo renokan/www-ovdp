@@ -166,7 +166,7 @@ def check_date(date_string):
     if re.search(r'\d{4}-\d\d-\d\d', date_string):
         # 2021-03-24 -> Ok
         return date_string
-    if re.search(r'\d{4}.\d\d.\d\d', date_string):
+    if re.search(r'\d{4}\.\d\d\.\d\d', date_string):
         # 2021.03.24 -> 2021-03-24 -> Ok
         temp = date_string.split(".")
         return "-".join(temp)
