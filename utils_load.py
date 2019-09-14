@@ -259,10 +259,10 @@ def inout_convert_data(period, data, scale_size, round_size=2):
 
 
 def inout_get_period(data_1, data_2, years_after):
-    years_1 = [x[0] for x in data_1 if x[0] > years_after]
-    years_2 = [x[0] for x in data_2 if x[0] > years_after]
-    years = list(set(years_1).union(set(years_2)))
+    data = data_1 + data_2
+    years = list(set([x[0] for x in data if x[0] > years_after]))
     years.sort()
+
     return years
 
 
